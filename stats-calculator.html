@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statistics Calculator</title>
+  <style>
+    /* Animated background and flex centering */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #a1c4fd, #c2e9fb);
+      background-size: 400% 400%;
+      animation: gradientBG 12s ease infinite;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px 20px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    p {
+      font-size: 14px;
+      color: #555;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #388e3c;
+    }
+
+    .result {
+      background: #f0f0f0;
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 16px;
+      color: #333;
+      text-align: left;
+    }
+
+    .error {
+      color: #d32f2f;
+    }
+
+    @media (max-width: 600px) {
+      h2 {
+        font-size: 22px;
+      }
+
+      input, button {
+        font-size: 18px;
+      }
+
+      .result {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>📊 Statistics Calculator</h2>
+    <p>Enter numbers separated by commas (e.g., 1, 2, 3, 4, 5)</p>
+
+    <input type="text" id="numbersInput" placeholder="Enter numbers..." />
+
+    <button onclick="calculateStats()">Calculate</button>
+    <button onclick="resetCalculator()">Reset</button>
+
+    <div class="result" id="output"></div>
+  </div>
+
+  <script>
+    function calculateStats() {
+      const input = document.getElementById("numbersInput").value;
+      const numbers = input
+        .split(",")
+        .map(num => parseFloat(num.trim()))
+        .filter(n => !isNaN(n));
+
+      const output = document.getElementById("output");
+
+      if (numbers.length === 0) {
+        output.innerHTML = "<span class='error'>Please enter valid numbers.</span>";
+        return;
+      }
+
+      const mean = numbers.reduce((a, b) => a + b, 0) / numbers.length;
+
+      const sorted = [...numbers].sort((a, b) => a - b);
+      const mid = Math.floor(sorted.length / 2);
+      const median = sorted.length % 2 !== 0
+        ? sorted[mid]
+        : (sorted[mid - 1] + sorted[mid]) / 2;
+
+      const freq = {};
+      numbers.forEach(num => freq[num] = (freq[num] || 0) + 1);
+      const maxFreq = Math.max(...Object.values(freq));
+      const mode = Object.keys(freq).filter(k => freq[k] === maxFreq).map(Number);
+      const modeText = mode.length === numbers.length
+        ? "No mode (all values are equally frequent)"
+        : mode.join(", ");
+
+      const sqDiffs = numbers.map(n => Math.pow(n - mean, 2));
+      const stdDev = Math.sqrt(sqDiffs.reduce((a, b) => a + b, 0) / numbers.length);
+      const cv = mean !== 0 ? (stdDev / mean) * 100 : "Undefined";
+
+      output.innerHTML = `
+        <strong>Mean:</strong> ${mean.toFixed(2)}<br>
+        <strong>Median:</strong> ${median}<br>
+        <strong>Mode:</strong> ${modeText}<br>
+        <strong>Standard Deviation:</strong> ${stdDev.toFixed(2)}<br>
+        <strong>Coefficient of Variation:</strong> ${typeof cv === "string" ? cv : cv.toFixed(2) + "%"}
+      `;
+    }
+
+    function resetCalculator() {
+      document.getElementById("numbersInput").value = "";
+      document.getElementById("output").innerHTML = "";
+    }
+
+    document.getElementById("numbersInput").addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        calculateStats();
+      }
+    });
+  </script>
+
+</body>
+</html>
